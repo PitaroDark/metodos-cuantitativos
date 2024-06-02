@@ -1,0 +1,34 @@
+{
+  "name": "metodos-cuantitativos",
+  "version": "0.1.0",
+  "private": true,
+  "author": "PitaroDark",
+  "description": "Aplicacion para la resolucion de algunos problemas de metodos cuantitativos",
+  "main": "main.mjs",
+  "scripts": {
+    "dev:electron": "concurrently -n \"NEXT-APP,ELECTRON\" -c \"yellow,blue\" --kill-others \"next dev\" \"electron .\"",
+    "dev:next": "next dev",
+    "build": "next build && electron-builder",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "electron-serve": "^2.0.0",
+    "next": "14.2.3",
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "concurrently": "^8.2.2",
+    "electron": "^30.0.9",
+    "electron-builder": "^24.13.3",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.3",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}

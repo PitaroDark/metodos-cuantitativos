@@ -1,5 +1,3 @@
-// Objective: Create a class to store the new variables that will be used in the application.
-
 class NewVars {
   private objectiveFunction: number[];
   private zRow: number[];
@@ -19,6 +17,11 @@ class NewVars {
     this.matriz = matriz;
     this.sAdd = sAdd;
     this.zi = zi;
+  }
+
+  private trasposingMatrix(matrix: number[][]) {
+    const result = matrix[0].map((col, i) => matrix.map((row) => row[i]));
+    return result;
   }
 
   private multiplyVectorDot(vector1: number[], vector2: number[]) {
@@ -71,20 +74,26 @@ class NewVars {
 
   private getObjectiveFunctionStandar() {
     const desicionBasisMatrix = this.getDesicionBasisMatrix();
-    const standar = 0
-    //TERMINAR LOGICA
-    const objectiveFunctionStandar = this.objectiveFunction.map(
-      (value, index) => {
-        return value - this.zRow[index];
+    const standarArrayBasis = [...Array(desicionBasisMatrix.length).fill(0)];
+    //Si la fila contiene un 1 y los demas son 0, se agrega el valor de la fila de la funcion objetivo
+    this.trasposingMatrix(desicionBasisMatrix).forEach((row, index) => {
+      if (row.filter((value) => value === 1).length === 1) {
+        const indexOne = row.findIndex((value) => value === 1);
+        standarArrayBasis[indexOne] = -1 * this.objectiveFunction[index];
       }
-    );
-    return objectiveFunctionStandar;
+    });
+    return standarArrayBasis;
+  }
+
+  public getBInverse_x_A() {
+    const inverseBasisMatrix = this.getInverseBasisMatrix();
+    const bInverse_x_A = this.multiplyMatrix(inverseBasisMatrix, this.sAdd);
+    return bInverse_x_A;
   }
 
   public calculateReducedCost() {
-    const inverseBasisMatrix = this.getInverseBasisMatrix();
+    const bInverse_x_A = this.getBInverse_x_A();
     const objectiveFunctionStandar = this.getObjectiveFunctionStandar();
-    const bInverse_x_A = this.multiplyMatrix(inverseBasisMatrix, this.sAdd);
     const cBInverse = this.multiplyVectorDot(
       objectiveFunctionStandar,
       bInverse_x_A
@@ -92,4 +101,29 @@ class NewVars {
     const r = -1 * this.zi - cBInverse;
     return r;
   }
+
+  public generateNewMatrizAndZRow(
+    totalDesicionVariables: number = 0,
+    matriz: number[][] = this.matriz,
+    zRow: number[] = this.zRow
+  ) {
+    const sAdd = this.getBInverse_x_A(); //Variables de restriccion
+    const zi = this.calculateReducedCost(); //Costo reducido
+    console.log("sAdd", sAdd);
+    console.log("zi", zi);
+    console.log("totalDesicionVars", totalDesicionVariables);
+    const newMatriz = matriz.map((row, index) => [
+      ...row.slice(0, totalDesicionVariables),
+      sAdd[index],
+      ...row.slice(totalDesicionVariables, row.length),
+    ]);
+    const newZRow = [
+      ...zRow.slice(0, totalDesicionVariables),
+      zi,
+      ...zRow.slice(totalDesicionVariables, zRow.length),
+    ];
+    return { newMatriz, newZRow };
+  }
 }
+
+export default NewVars;

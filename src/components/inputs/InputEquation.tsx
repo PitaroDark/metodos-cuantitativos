@@ -55,7 +55,10 @@ const InputEquation: React.FC<InputEquationProps> = ({
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    if (value.length === 0) return setMask("");
+    if (value.length === 0) {
+      setCoefficients([]);
+      return setMask("");
+    }
     // Permitir un signo al inicio y opcionalmente al final, permitiendo entrada gradual
     if (!/^[+-]?[0-9]*([+-][0-9]+)*[+-]?$/.test(value)) return;
     setMask(value);

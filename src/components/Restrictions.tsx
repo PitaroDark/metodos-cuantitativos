@@ -28,9 +28,8 @@ function Restrictions({ restrictions, setRestrictions }: RestrictionsProps) {
     <div className="flex flex-col w-full mb-5">
       <p className="text-2xl text-white mb-1">Restricciones</p>
       {restrictions.map((restriction) => (
-        <div className="flex row-auto my-2">
+        <div key={restriction.id} className="flex row-auto my-2">
           <Restriction
-            key={restriction.id}
             restriction={restriction}
             setRestriction={(restriction) => {
               const newRestrictions = restrictions.map((r) =>

@@ -1,11 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Navbar } from "@/components/Navbar";
+import NewVars from "@/models/NewVars";
+import Simplex from "@/models/Simplex";
 import ObjectiveFunction from "@/components/ObjectiveFunction";
-import { ObjectiveFunctionType, RestrictionType } from "@/types/types";
+import InputResult from "@/components/inputs/InputResult";
 import Restrictions from "@/components/Restrictions";
 import OptimeTable from "@/components/OptimeTable";
-import InputResult from "@/components/inputs/InputResult";
+import { Navbar } from "@/components/Navbar";
+import Loading from "@/components/Loading";
+import { ObjectiveFunctionType, RestrictionType } from "@/types/types";
 
 export default function AddVars() {
   const [objectiveFunction, setObjectiveFunction] =
@@ -25,7 +28,16 @@ export default function AddVars() {
   const [matriz, setMatriz] = useState<number[][]>([]);
   const [sAdded, setSAdded] = useState<number[]>([]);
   const [zAdded, setZAdded] = useState<number>(0);
+  const [reducedCost, setReducedCost] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(false);
   const [solved, setSolved] = useState<boolean>(false);
+  const [stateSolved, setStateSolved] = useState<{
+    matriz: number[][];
+    zRow: number[];
+  }>({
+    matriz: [],
+    zRow: [],
+  });
 
   useEffect(() => {
     //Fill sAdded with 0 but dont change values if exists
@@ -36,7 +48,41 @@ export default function AddVars() {
   }, [restrictions]);
 
   const onClickResolve = () => {
-    //const newVars = new NewVars();
+    setLoading(true);
+    const newVariables = new NewVars(
+      objectiveFunction.coefficients,
+      zRow,
+      matriz,
+      sAdded,
+      zAdded
+    );
+    const cost = newVariables.calculateReducedCost();
+    setReducedCost(cost);
+    const lenghtOF = objectiveFunction.coefficients.length;
+    const { newMatriz, newZRow } =
+      newVariables.generateNewMatrizAndZRow(lenghtOF);
+    if (cost < 0) {
+      //Realizamos el metodo Simplex Primal
+      const simplex = new Simplex(lenghtOF + 1, newMatriz, newZRow);
+      // while (simplex.hasNext()) {
+      //   const iteration = simplex.solveByIteration();
+      //   const { matriz, zRow } = simplex.getMatrizAndZRow();
+      // }
+      simplex.solve();
+      const { matriz, zRow } = simplex.getMatrizAndZRow();
+      setSolved(true);
+      setStateSolved({
+        matriz: matriz,
+        zRow: zRow,
+      });
+    } else {
+      setSolved(true);
+      setStateSolved({
+        matriz: newMatriz,
+        zRow: newZRow,
+      });
+    }
+    setLoading(false);
   };
 
   return (
@@ -106,10 +152,28 @@ export default function AddVars() {
               <h2 className="text-4xl text-white text-center my-10">
                 Resultados
               </h2>
+              <p className="text-white">
+                Se calculo el costo reducido, su valor es: <b>{reducedCost}</b>
+              </p>
+              <p className="text-white mb-10">
+                Al ser{" "}
+                {reducedCost < 0
+                  ? "menor que 0, no hay factibilidad dual y esta requiere del metodo Simplex Primal para encontrar una solución optima."
+                  : "mayor o igual a 0, hay factibilidad dual y la solución es optima, por lo tanto, se muestra la tabla optima nueva."}
+              </p>
+              <OptimeTable
+                desicionColumns={objectiveFunction.coefficients.length + 1}
+                slackColumns={restrictions.length}
+                rows={restrictions.length}
+                matriz={stateSolved.matriz}
+                zRow={stateSolved.zRow}
+                disabled={true}
+              />
             </>
           )}
         </div>
       </div>
+      {false && <Loading message="Resolviendo..." />}
     </>
   );
 }

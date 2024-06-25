@@ -7,9 +7,10 @@ interface OptimeTableProps {
   slackColumns: number;
   rows: number;
   zRow: number[]; //x
-  setZRow: (zRow: number[]) => void;
+  setZRow?: (zRow: number[]) => void;
   matriz: number[][]; //xy
-  setMatriz: (sRows: number[][]) => void;
+  setMatriz?: (sRows: number[][]) => void;
+  disabled?: boolean;
 }
 
 function OptimeTable({
@@ -20,15 +21,17 @@ function OptimeTable({
   setZRow,
   matriz,
   setMatriz,
+  disabled = false,
 }: OptimeTableProps) {
   useEffect(() => {
+    if (disabled) return;
     const size = desicionColumns + slackColumns + 1;
     const newMatriz = [...Array(rows)].map(() => [...Array(size)].fill(0));
     const newZRow = [...Array(size)].map((_, i) => {
       return zRow[i] !== undefined ? zRow[i] : 0;
     });
-    setMatriz(newMatriz);
-    setZRow(newZRow);
+    setMatriz!(newMatriz);
+    setZRow!(newZRow);
   }, [desicionColumns, slackColumns]);
 
   return (
@@ -68,8 +71,9 @@ function OptimeTable({
                   setValue={(value) => {
                     const newZRow = [...zRow];
                     newZRow[i] = value;
-                    setZRow(newZRow);
+                    setZRow!(newZRow);
                   }}
+                  disabled={disabled}
                 />
               </td>
             ))}
@@ -85,8 +89,9 @@ function OptimeTable({
                       const newMatriz = matriz.map((r, k) =>
                         k === i ? r.map((v, l) => (l === j ? value : v)) : r
                       );
-                      setMatriz(newMatriz);
+                      setMatriz!(newMatriz);
                     }}
+                    disabled={disabled}
                   />
                 </td>
               ))}

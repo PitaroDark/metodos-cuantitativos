@@ -173,7 +173,7 @@ export default function AddVars() {
           )}
         </div>
       </div>
-      {false && <Loading message="Resolviendo..." />}
+      {loading && <Loading message="Resolviendo..." />}
     </>
   );
 }

@@ -109,9 +109,6 @@ class NewVars {
   ) {
     const sAdd = this.getBInverse_x_A(); //Variables de restriccion
     const zi = this.calculateReducedCost(); //Costo reducido
-    console.log("sAdd", sAdd);
-    console.log("zi", zi);
-    console.log("totalDesicionVars", totalDesicionVariables);
     const newMatriz = matriz.map((row, index) => [
       ...row.slice(0, totalDesicionVariables),
       sAdd[index],
